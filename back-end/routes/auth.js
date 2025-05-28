@@ -11,6 +11,7 @@ router.post('/register', async (req, res) => {
         // 密码加密
         const hashedPassword = await bcrypt.hash(password, 10);
         
+        // 选择表名
         if (isAdmin) {
             // 管理员注册
             const [existingAdmins] = await db.execute(
@@ -61,6 +62,11 @@ router.post('/register', async (req, res) => {
                 adminAccount: randomAdmin.admin_account
             });
         }
+
+
+
+        
+       
     } catch (error) {
         console.error('注册错误:', error);
         res.status(500).json({ message: '注册失败，请稍后重试' });
@@ -72,6 +78,7 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password, isAdmin } = req.body;
         
+        // 选择表名
         if (isAdmin) {
             // 管理员登录
             const [admins] = await db.execute(
@@ -119,6 +126,7 @@ router.post('/login', async (req, res) => {
                 user: userWithoutPassword
             });
         }
+        
     } catch (error) {
         console.error('登录错误:', error);
         res.status(500).json({ message: '登录失败，请稍后重试' });

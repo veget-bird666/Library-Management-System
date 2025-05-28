@@ -3,6 +3,8 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import AdminView from '../views/AdminView.vue'
 import UserView from '../views/UserView.vue'
+import AdminLayout from '../layout/AdminLayout.vue'
+import Books        from '../views/Books.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,7 +22,7 @@ const router = createRouter({
     {
       path: '/admin',
       name: 'admin',
-      component: AdminView,
+      component: AdminLayout,
       children: [
         {
           path: 'borrow',
@@ -30,8 +32,8 @@ const router = createRouter({
         {
           path: 'books',
           name: 'admin-books',
-          component: AdminView
-        },
+          component: Books,
+        }/*,
         {
           path: 'readers',
           name: 'admin-readers',
@@ -56,7 +58,7 @@ const router = createRouter({
           path: 'statistics',
           name: 'admin-statistics',
           component: AdminView
-        }
+        }*/
       ]
     },
     {

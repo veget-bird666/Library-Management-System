@@ -15,6 +15,7 @@ interface LoginData {
   isAdmin: boolean
 }
 
+
 export const register = async (data: RegisterData) => {
   try {
     const response = await axios.post(`${BASE_URL}/auth/register`, data)
@@ -32,3 +33,4 @@ export const login = async (data: LoginData) => {
     throw error
   }
 } 
+
