@@ -5,6 +5,9 @@ import AdminView from '../views/AdminView.vue'
 import UserView from '../views/UserView.vue'
 import AdminLayout from '../layout/AdminLayout.vue'
 import Books        from '../views/Books.vue'
+import UserBooks    from '../views/UserBooks.vue'
+import UserLayout from '@/layout/UserLayout.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -64,7 +67,7 @@ const router = createRouter({
     {
       path: '/user',
       name: 'user',
-      component: UserView,
+      component: UserLayout,
       children: [
         {
           path: '',
@@ -72,9 +75,9 @@ const router = createRouter({
           component: UserView
         },
         {
-          path: 'function1',
-          name: 'user-function1',
-          component: UserView
+          path: 'books',
+          name: 'user-books',
+          component: UserBooks
         },
         {
           path: 'function2',

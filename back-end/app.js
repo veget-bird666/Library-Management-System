@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./config/database');
 const authRoutes = require('./routes/auth');
-const bookRoutes = require('./routes/book'); // 引入book路由
+const bookRoutes = require('./routes/book'); 
+const userBookRoutes = require('./routes/userBook');// 引入book路由
 
 const app = express();
 
@@ -14,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 // 路由
 app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes); // 使用复数形式更符合RESTful规范
-
+app.use('/api/userBooks', userBookRoutes); // 使用复数形式更符合RESTful规范
 // 测试路由
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the Library Management System API' });
