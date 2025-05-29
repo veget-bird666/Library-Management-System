@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = '/api/user/books';
+const BASE_URL = '/api/userBook';
 
 /* 图书数据类型 */
 export interface Book {

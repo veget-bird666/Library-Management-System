@@ -7,7 +7,13 @@ import AdminLayout from '../layout/AdminLayout.vue'
 import Books        from '../views/Books.vue'
 import UserBooks    from '../views/UserBooks.vue'
 import UserLayout from '@/layout/UserLayout.vue'
-
+import Borrow from '@/views/Borrow.vue'
+import UserManage from '@/views/UserManage.vue'
+import TypeManage from '@/views/TypeManage.vue' 
+import AnnouncementManage from '@/views/AnnouncementManage.vue'
+import AdminManage from '@/views/AdminManage.vue'
+import UserBorrow from '@/views/UserBorrow.vue'
+import UserAnnouncement from '@/views/UserAnnouncement.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,38 +36,38 @@ const router = createRouter({
         {
           path: 'borrow',
           name: 'admin-borrow',
-          component: AdminView
+          component:Borrow
         },
         {
           path: 'books',
           name: 'admin-books',
           component: Books,
-        }/*,
+        },
         {
           path: 'readers',
           name: 'admin-readers',
-          component: AdminView
+          component: UserManage
         },
         {
           path: 'categories',
           name: 'admin-categories',
-          component: AdminView
+          component: TypeManage
         },
         {
           path: 'announcements',
           name: 'admin-announcements',
-          component: AdminView
+          component: AnnouncementManage
         },
         {
           path: 'settings',
           name: 'admin-settings',
-          component: AdminView
+          component: AdminManage
         },
         {
           path: 'statistics',
           name: 'admin-statistics',
           component: AdminView
-        }*/
+        }
       ]
     },
     {
@@ -82,12 +88,12 @@ const router = createRouter({
         {
           path: 'function2',
           name: 'user-function2',
-          component: UserView
+          component: UserBorrow
         },
         {
           path: 'function3',
           name: 'user-function3',
-          component: UserView
+          component: UserAnnouncement
         }
       ]
     }
