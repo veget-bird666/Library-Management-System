@@ -2,7 +2,7 @@ const mysql = require('mysql2');
 
 // 创建连接池
 const pool = mysql.createPool({
-  host: '123.249.11.249',  // 使用公网地址
+  host: '113.44.173.238',  // 使用公网地址
   user: 'root',            // 用户名
   password: 'Lib112233',    // 密码
   database: 'library',     // 数据库名
