@@ -86,8 +86,8 @@ const router = createRouter({
           component: UserBooks
         },
         {
-          path: 'function2',
-          name: 'user-function2',
+          path: 'borrow',
+          name: 'user-borrow',
           component: UserBorrow
         },
         {
