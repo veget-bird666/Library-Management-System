@@ -5,7 +5,9 @@ import BorrowDialog from '../components/BorrowDialog.vue'
 import ReturnDialog from '../components/ReturnDialog.vue'
 import ApplicationDialog from '../components/ApplicationDialog.vue'
 import { getBorrowList, deleteBorrowRecord } from '../api/borrow'
+import useUserStore from '../stores/user'
 
+const userStore = useUserStore()
 const borrowDialogVisible = ref(false)
 const returnDialogVisible = ref(false)
 const applicationDialogVisible = ref(false)
@@ -122,7 +124,11 @@ onMounted(() => {
         <el-button type="success" @click="showReturnDialog">
           还书
         </el-button>
-        <el-button type="info" @click="applicationDialogVisible = true">
+        <el-button 
+          v-if="userStore.userInfo?.admin_account"
+          type="info" 
+          @click="applicationDialogVisible = true"
+        >
           查看申请
         </el-button>
       </div>

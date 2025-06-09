@@ -13,6 +13,8 @@ export const getUserBorrowedBooks = async (params: {
 export const applyBorrowBook = async (data: {
   bookId: string
   userAccount: string
+  userPassword: string
+  adminAccount: string
   userRemark?: string
 }) => {
   return request.post('/api/userborrow/apply', data)

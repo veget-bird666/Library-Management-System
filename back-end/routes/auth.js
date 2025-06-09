@@ -99,8 +99,15 @@ router.post('/login', async (req, res) => {
             
             const { admin_password: _, ...adminWithoutPassword } = admin;
             res.json({
-                message: '登录成功',
-                user: adminWithoutPassword
+                success: true,
+                data: {
+                    user: {
+                        ...adminWithoutPassword,
+                        admin_account: admin.admin_account,
+                        admin_nickname: admin.admin_nickname
+                    }
+                },
+                message: '登录成功'
             });
         } else {
             // 普通用户登录
@@ -122,8 +129,11 @@ router.post('/login', async (req, res) => {
             
             const { user_password: _, ...userWithoutPassword } = user;
             res.json({
-                message: '登录成功',
-                user: userWithoutPassword
+                success: true,
+                data: {
+                    user: userWithoutPassword
+                },
+                message: '登录成功'
             });
         }
         
@@ -131,6 +141,39 @@ router.post('/login', async (req, res) => {
         console.error('登录错误:', error);
         res.status(500).json({ message: '登录失败，请稍后重试' });
     }
+});
+
+// 查询管理员
+router.get('/admin/search', async (req, res) => {
+  const connection = await db.getConnection();
+  try {
+    const { keyword } = req.query;
+    
+    let query = 'SELECT admin_account, admin_nickname as nickname FROM admin WHERE 1=1';
+    const params = [];
+    
+    if (keyword) {
+      query += ' AND (admin_account LIKE ? OR admin_nickname LIKE ?)';
+      params.push(`%${keyword}%`, `%${keyword}%`);
+    }
+    
+    const [admins] = await connection.execute(query, params);
+    
+    res.json({
+      success: true,
+      data: admins
+    });
+  } catch (err) {
+    console.error('查询管理员失败:', err);
+    res.status(500).json({
+      success: false,
+      message: '查询管理员失败'
+    });
+  } finally {
+    if (connection) {
+      await connection.release();
+    }
+  }
 });
 
 module.exports = router; 

@@ -34,7 +34,7 @@ const handleLogin = async () => {
     })
 
     // 存储用户信息
-    const userData = response.user
+    const userData = response.data.user
     userStore.setUserInfo(userData)
     userStore.setUserId(selectedRole.value === 'admin' ? userData.admin_id : userData.user_id)
     userStore.setUserRole(selectedRole.value)

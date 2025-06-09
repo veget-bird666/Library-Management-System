@@ -442,16 +442,48 @@ router.delete('/:recordId', async (req, res) => {
 
 // 获取管理员的借阅申请列表
 router.get('/applications', async (req, res) => {
+  const connection = await db.getConnection();
   try {
-    const { page = 1, size = 10, admin_account } = req.query;
+    const { page = 1, size = 10, admin_account, status } = req.query;
+
+    console.log('收到的请求参数:', {
+      page,
+      size,
+      admin_account,
+      status
+    });
+
+    // 参数验证
+    if (!admin_account) {
+      console.log('缺少管理员账号参数');
+      return res.status(400).json({
+        success: false,
+        message: '请提供管理员账号'
+      });
+    }
+
+    // 验证管理员是否存在
+    const [adminCheck] = await connection.query(
+      'SELECT admin_account FROM admin WHERE admin_account = ?',
+      [admin_account]
+    );
+
+    console.log('管理员检查结果:', adminCheck);
+
+    if (adminCheck.length === 0) {
+      console.log('管理员账号不存在:', admin_account);
+      return res.status(404).json({
+        success: false,
+        message: '管理员账号不存在'
+      });
+    }
 
     const pageInt = parseInt(page);
     const sizeInt = Math.max(1, Math.min(100, parseInt(size)));
     const offset = (pageInt - 1) * sizeInt;
 
-    // 获取申请列表
-    const [applications] = await db.query(
-      `SELECT 
+    let query = `
+      SELECT 
         ba.application_id,
         ba.book_id,
         b.title as book_title,
@@ -472,20 +504,54 @@ router.get('/applications', async (req, res) => {
       FROM borrow_application ba
       INNER JOIN book b ON ba.book_id = b.book_id
       INNER JOIN user u ON ba.user_account = u.user_account
-      WHERE u.admin_account = ?
-      ORDER BY ba.apply_time DESC
-      LIMIT ?, ?`,
-      [admin_account, offset, sizeInt]
-    );
+      WHERE ba.admin_account = ?
+    `;
+
+    const queryParams = [admin_account];
+
+    // 如果指定了状态，添加状态筛选
+    if (status !== undefined && status !== null && status !== '') {
+      query += ' AND ba.status = ?';
+      queryParams.push(parseInt(status));
+    }
+
+    query += ' ORDER BY ba.apply_time DESC LIMIT ?, ?';
+    queryParams.push(offset, sizeInt);
+
+    console.log('执行的SQL查询:', {
+      query,
+      params: queryParams
+    });
+
+    // 获取申请列表
+    const [applications] = await connection.query(query, queryParams);
+
+    console.log('查询结果:', {
+      count: applications.length,
+      firstRow: applications[0]
+    });
 
     // 获取总数
-    const [total] = await db.query(
-      `SELECT COUNT(*) as total 
-       FROM borrow_application ba
-       INNER JOIN user u ON ba.user_account = u.user_account
-       WHERE u.admin_account = ?`,
-      [admin_account]
-    );
+    let countQuery = `
+      SELECT COUNT(*) as total 
+      FROM borrow_application ba
+      WHERE ba.admin_account = ?
+    `;
+    const countParams = [admin_account];
+
+    if (status !== undefined && status !== null && status !== '') {
+      countQuery += ' AND ba.status = ?';
+      countParams.push(parseInt(status));
+    }
+
+    console.log('执行的计数SQL查询:', {
+      query: countQuery,
+      params: countParams
+    });
+
+    const [total] = await connection.query(countQuery, countParams);
+
+    console.log('总数查询结果:', total[0]);
 
     res.json({
       success: true,
@@ -499,11 +565,24 @@ router.get('/applications', async (req, res) => {
     });
 
   } catch (err) {
-    console.error('获取借阅申请列表失败:', err);
+    console.error('获取借阅申请列表失败:', {
+      error: err,
+      stack: err.stack,
+      query: req.query
+    });
     res.status(500).json({ 
       success: false,
-      message: '获取借阅申请列表失败'
+      message: '获取借阅申请列表失败',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
+  } finally {
+    if (connection) {
+      try {
+        await connection.release();
+      } catch (err) {
+        console.error('释放数据库连接失败:', err);
+      }
+    }
   }
 });
 

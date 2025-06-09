@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const bcrypt = require('bcryptjs');
 
 // 获取用户已借阅的图书列表
 router.get('/borrowed', async (req, res) => {
@@ -169,12 +170,36 @@ router.get('/applications', async (req, res) => {
 router.post('/apply', async (req, res) => {
   const connection = await db.getConnection();
   try {
-    const { bookId, userAccount, userRemark } = req.body;
+    const { bookId, userAccount, userPassword, adminAccount, userRemark } = req.body;
 
-    if (!bookId || !userAccount) {
+    if (!bookId || !userAccount || !userPassword || !adminAccount) {
       return res.status(400).json({
         success: false,
-        message: '图书ID和用户账号不能为空'
+        message: '请提供完整的申请信息'
+      });
+    }
+
+    // 验证用户账号和密码
+    const [users] = await connection.query(
+      'SELECT * FROM user WHERE user_account = ? AND status = 1',
+      [userAccount]
+    );
+
+    if (users.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: '用户账号不存在或已被禁用'
+      });
+    }
+
+    // 验证密码
+    const user = users[0];
+    const validPassword = await bcrypt.compare(userPassword, user.user_password);
+    
+    if (!validPassword) {
+      return res.status(401).json({
+        success: false,
+        message: '密码错误'
       });
     }
 
@@ -183,6 +208,12 @@ router.post('/apply', async (req, res) => {
       'SELECT * FROM borrow_application WHERE book_id = ? AND user_account = ? AND status = 0',
       [bookId, userAccount]
     );
+
+    console.log('检查现有申请:', {
+      bookId,
+      userAccount,
+      existingApplications
+    });
 
     if (existingApplications.length > 0) {
       return res.status(400).json({
@@ -206,8 +237,8 @@ router.post('/apply', async (req, res) => {
 
     // 插入申请记录
     await connection.query(
-      'INSERT INTO borrow_application (book_id, user_account, user_remark, status) VALUES (?, ?, ?, 0)',
-      [bookId, userAccount, userRemark || null]
+      'INSERT INTO borrow_application (book_id, user_account, admin_account, user_remark, status) VALUES (?, ?, ?, ?, 0)',
+      [bookId, userAccount, adminAccount, userRemark || null]
     );
 
     res.json({
