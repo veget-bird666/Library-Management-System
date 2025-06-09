@@ -16,8 +16,8 @@ export const getAvailableBooks = async ({ keyword, page = 1, size = 10 }) => {
 
 // 提交借阅请求
 export const borrowBook = async (data) => {
-  console.log("传入的借阅数据为");
-  console.log(data);
+  // console.log("传入的借阅数据为");
+  // console.log(data);
   return request.post('/api/borrow', data)
 }
 
@@ -39,4 +39,9 @@ export const getBorrowList = async (params) => {
 // 删除借阅记录
 export const deleteBorrowRecord = async (recordId) => {
   return request.delete(`/api/borrow/${recordId}`)
+}
+
+// 获取借阅申请列表
+export const getBorrowApplications = async (params) => {
+  return request.get('/api/borrow/applications', { params })
 }

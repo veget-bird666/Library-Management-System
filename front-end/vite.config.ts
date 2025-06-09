@@ -16,6 +16,7 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
+    extensions: ['.js', '.ts', '.vue']
   },
   server: {
     proxy: {
@@ -24,6 +25,15 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       }
+    }
+  },
+  optimizeDeps: {
+    force: true
+  },
+  build: {
+    sourcemap: true,
+    commonjsOptions: {
+      include: []
     }
   }
 })

@@ -2,8 +2,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '@/services/api'
+import useUserStore from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 const selectedRole = ref('user')
 
 const formData = ref({
@@ -32,10 +34,10 @@ const handleLogin = async () => {
     })
 
     // 存储用户信息
-    localStorage.setItem('user', JSON.stringify({
-      username: response.username, // 假设后端返回了用户名
-      isAdmin: selectedRole.value === 'admin'
-    }))
+    const userData = response.user
+    userStore.setUserInfo(userData)
+    userStore.setUserId(selectedRole.value === 'admin' ? userData.admin_id : userData.user_id)
+    userStore.setUserRole(selectedRole.value)
 
     if (selectedRole.value === 'admin') {
       router.push('/admin/borrow')

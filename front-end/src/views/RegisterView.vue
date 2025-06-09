@@ -2,8 +2,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { register } from '@/services/api'
+import useUserStore from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 const selectedRole = ref('user')
 
 const formData = ref({
@@ -40,10 +42,10 @@ const handleRegister = async () => {
     })
 
     // 存储用户信息
-    localStorage.setItem('user', JSON.stringify({
-      username: formData.value.username,
-      isAdmin: selectedRole.value === 'admin'
-    }))
+    const userData = response.user
+    userStore.setUserInfo(userData)
+    userStore.setUserId(selectedRole.value === 'admin' ? userData.admin_id : userData.user_id)
+    userStore.setUserRole(selectedRole.value)
 
     // 注册成功后跳转
     if (selectedRole.value === 'admin') {

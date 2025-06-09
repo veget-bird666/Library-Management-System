@@ -3,10 +3,12 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import BorrowDialog from '../components/BorrowDialog.vue'
 import ReturnDialog from '../components/ReturnDialog.vue'
+import ApplicationDialog from '../components/ApplicationDialog.vue'
 import { getBorrowList, deleteBorrowRecord } from '../api/borrow'
 
 const borrowDialogVisible = ref(false)
 const returnDialogVisible = ref(false)
+const applicationDialogVisible = ref(false)
 const borrowRecords = ref([])
 const loading = ref(false)
 const currentPage = ref(1)
@@ -48,7 +50,7 @@ const fetchBorrowList = async () => {
 const handleDelete = async (record) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除 ${record.user_name} 借阅的《${record.book_title}》的记录吗？`,
+      `确定要删除 ${record.nickname} 借阅的《${record.book_title}》的记录吗？`,
       '提示',
       {
         confirmButtonText: '确定',
@@ -120,6 +122,9 @@ onMounted(() => {
         <el-button type="success" @click="showReturnDialog">
           还书
         </el-button>
+        <el-button type="info" @click="applicationDialogVisible = true">
+          查看申请
+        </el-button>
       </div>
     </div>
 
@@ -131,11 +136,11 @@ onMounted(() => {
         style="width: 100%"
       >
         <el-table-column prop="book_title" label="图书名称" />
-        <el-table-column prop="user_name" label="借阅人" />
+        <el-table-column prop="nickname" label="借阅人" />
         <el-table-column prop="user_account" label="借书卡号" />
         <el-table-column prop="borrow_time" label="借书时间" />
         <el-table-column prop="should_return_time" label="应还时间" />
-        <el-table-column prop="status" label="状态" />
+        <el-table-column prop="status_text" label="状态" />
         <el-table-column label="操作" width="100">
           <template #default="scope">
             <el-button
@@ -178,6 +183,11 @@ onMounted(() => {
     <ReturnDialog
       v-model:dialogVisible="returnDialogVisible"
       @return-success="handleReturnSuccess"
+    />
+
+    <!-- 申请列表弹窗 -->
+    <ApplicationDialog
+      v-model:dialogVisible="applicationDialogVisible"
     />
   </div>
 </template>

@@ -3,8 +3,9 @@ const cors = require('cors');
 const db = require('./config/database');
 const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/book'); 
-const userBookRoutes = require('./routes/userBook');// 引入book路由
-const borrowRoutes = require('./routes/borrow'); // 引入borrow路由
+const userBookRoutes = require('./routes/userBook');
+const borrowRoutes = require('./routes/borrow');
+const userBorrowRoutes = require('./routes/userborrow');
 
 const app = express();
 
@@ -15,9 +16,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // 路由
 app.use('/api/auth', authRoutes);
-app.use('/api/books', bookRoutes); // 使用复数形式更符合RESTful规范
-app.use('/api/userBooks', userBookRoutes); // 使用复数形式更符合RESTful规范
-app.use('/api/borrow', borrowRoutes); // 添加借阅相关路由
+app.use('/api/books', bookRoutes);
+app.use('/api/userBooks', userBookRoutes);
+app.use('/api/borrow', borrowRoutes);
+app.use('/api/userborrow', userBorrowRoutes);
+
 // 测试路由
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the Library Management System API' });
@@ -35,4 +38,4 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-module.exports = app; // 导出app用于测试
+module.exports = app;

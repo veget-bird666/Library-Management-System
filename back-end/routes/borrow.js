@@ -316,13 +316,11 @@ router.get('/list', async (req, res) => {
   try {
     const { page = 1, size = 10, status = 1 } = req.query;
 
-    // 确保所有参数都是数字类型
     const pageInt = parseInt(page);
     const sizeInt = Math.max(1, Math.min(100, parseInt(size)));
     const statusInt = parseInt(status);
     const offset = (pageInt - 1) * sizeInt;
 
-    // 使用 query 而不是 execute
     const [records] = await db.query(
       `SELECT 
         br.record_id,
@@ -330,10 +328,15 @@ router.get('/list', async (req, res) => {
         b.book_id,
         u.nickname,
         u.user_account,
-        br.borrow_time,
-        br.should_return_time,
-        br.return_time,
-        br.status
+        DATE_FORMAT(br.borrow_time, '%Y-%m-%d %H:%i:%s') as borrow_time,
+        DATE_FORMAT(br.should_return_time, '%Y-%m-%d') as should_return_time,
+        DATE_FORMAT(br.return_time, '%Y-%m-%d %H:%i:%s') as return_time,
+        br.status,
+        CASE 
+          WHEN br.status = 1 THEN '借出'
+          WHEN br.status = 2 THEN '已归还'
+          ELSE '未知'
+        END as status_text
       FROM borrow_record br
       INNER JOIN book b ON br.book_id = b.book_id
       INNER JOIN user u ON br.user_account = u.user_account
@@ -433,6 +436,73 @@ router.delete('/:recordId', async (req, res) => {
     res.status(500).json({
       success: false,
       message: '删除借阅记录失败'
+    });
+  }
+});
+
+// 获取管理员的借阅申请列表
+router.get('/applications', async (req, res) => {
+  try {
+    const { page = 1, size = 10, admin_account } = req.query;
+
+    const pageInt = parseInt(page);
+    const sizeInt = Math.max(1, Math.min(100, parseInt(size)));
+    const offset = (pageInt - 1) * sizeInt;
+
+    // 获取申请列表
+    const [applications] = await db.query(
+      `SELECT 
+        ba.application_id,
+        ba.book_id,
+        b.title as book_title,
+        ba.user_account,
+        u.nickname as user_nickname,
+        ba.apply_time,
+        ba.status,
+        CASE 
+          WHEN ba.status = 0 THEN '待处理'
+          WHEN ba.status = 1 THEN '已批准'
+          WHEN ba.status = 2 THEN '已拒绝'
+          ELSE '未知'
+        END as status_text,
+        ba.user_remark,
+        ba.admin_remark,
+        DATE_FORMAT(ba.apply_time, '%Y-%m-%d %H:%i:%s') as formatted_apply_time,
+        DATE_FORMAT(ba.process_time, '%Y-%m-%d %H:%i:%s') as formatted_process_time
+      FROM borrow_application ba
+      INNER JOIN book b ON ba.book_id = b.book_id
+      INNER JOIN user u ON ba.user_account = u.user_account
+      WHERE u.admin_account = ?
+      ORDER BY ba.apply_time DESC
+      LIMIT ?, ?`,
+      [admin_account, offset, sizeInt]
+    );
+
+    // 获取总数
+    const [total] = await db.query(
+      `SELECT COUNT(*) as total 
+       FROM borrow_application ba
+       INNER JOIN user u ON ba.user_account = u.user_account
+       WHERE u.admin_account = ?`,
+      [admin_account]
+    );
+
+    res.json({
+      success: true,
+      data: applications,
+      pagination: {
+        total: total[0].total,
+        page: pageInt,
+        pageSize: sizeInt,
+        totalPages: Math.ceil(total[0].total / sizeInt)
+      }
+    });
+
+  } catch (err) {
+    console.error('获取借阅申请列表失败:', err);
+    res.status(500).json({ 
+      success: false,
+      message: '获取借阅申请列表失败'
     });
   }
 });
